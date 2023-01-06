@@ -1,0 +1,10 @@
+select name from instructor union select name from student;
+select course.course_id, title, ID from course join teaches on course.course_id = teaches.course_id group by course.course_id, ID;
+select ID, name, salary from instructor where salary < 75000;
+select dept_name, count(ID) from instructor group by dept_name;
+select title, course.course_id, prereq_id from prereq join course on prereq.course_id = course.course_id group by course.course_id, prereq_id;
+select name from instructor join department on instructor.dept_name = department.dept_name where salary > 0.1 * budget;
+select dept_name from department where building in (select building from department group by building having count(building) > 1);
+select department.dept_name, count(student.ID) * 5000 as income from department join student on department.dept_name = student.dept_name group by department.dept_name;
+select name from instructor where instructor.ID not in (select ID from teaches union select i_id as ID from advisor);
+select ID, name from student where student.ID in (select ID from takes join course on takes.course_id = course.course_id where course.dept_name = 'Comp. Sci.' intersect select ID from takes join course on takes.course_id = course.course_id where course.dept_name = 'Biology');
