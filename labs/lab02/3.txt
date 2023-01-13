@@ -1,0 +1,11 @@
+with cdb as (
+    with temp as (
+        select title, rating, count(rating) from ratings join
+        movies on ratings.movieId = movies.movieId where
+        title ilike 'City Hall (1996)' group by title, rating
+    )
+    select ratings_master.rating, temp.count from
+    generate_series(0.0, 5.0, 0.5) as ratings_master(rating) full outer join
+    temp on ratings_master.rating = temp.rating group by ratings_master.rating, temp.count
+)
+select rating, coalesce(count,0) as count from cdb;

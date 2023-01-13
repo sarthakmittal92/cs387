@@ -1,0 +1,4 @@
+with ar as (
+    select movieId, title, string_to_array(genres,'|') as str from movies
+)
+select movieId, title, genre from ar cross join unnest(ar.str) as genre;
