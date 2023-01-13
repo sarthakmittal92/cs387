@@ -1,0 +1,13 @@
+with msdb as (
+    select avg(rat * c) from (
+        select ratings.movieId, avg(rating) as rat, count(title) as c, genres from ratings join
+        movies on ratings.movieId = movies.movieId where
+        genres ilike '%comedy%' group by ratings.movieId, genres
+    )
+as temp),
+dramadb as (
+    select movies.movieId, title, avg(rating) as rat from ratings join
+    movies on movies.movieID = ratings.movieID where
+    genres ilike '%children%' group by movies.movieId, title
+)
+select dramadb.movieId, title from dramadb, msdb where dramadb.rat >= msdb.avg group by dramadb.movieId, title;

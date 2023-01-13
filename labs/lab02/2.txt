@@ -1,0 +1,6 @@
+with cdb as (
+    select movieId, genres from movies where
+    genres ilike '%comedy%' and movieId <= 3
+)
+select userId from ratings join
+cdb on ratings.movieId = cdb.movieId group by userId;

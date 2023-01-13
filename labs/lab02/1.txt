@@ -1,0 +1,13 @@
+with msdb as (
+    select max(rat) from (
+        select ratings.movieId, max(rating) as rat, tag from ratings join
+        tags on ratings.movieId = tags.movieId where
+        tags.tag ilike '%quentin tarantino%' group by ratings.movieId, tag
+    )
+as temp),
+dramadb as (
+    select movies.movieId, title, max(rating) as rat from ratings join
+    movies on movies.movieID = ratings.movieID where
+    genres ilike '%drama%' group by movies.movieId, title
+)
+select title from dramadb, msdb where dramadb.rat >= msdb.max group by title;
