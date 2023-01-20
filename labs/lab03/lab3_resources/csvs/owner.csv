@@ -1,10 +1,8 @@
 owner_id,owner_name,owner_type,team_id,stake
-1,"T. Venkattram Reddy
-",Person,8,60
+1,T. Venkattram Reddy,Person,8,60
 2,Gayatri Reddy,Person,8,40
 3,Ravindra Gaikwad,Person,9,35
-4,"Shailendra Gaikwad
-",Person,9,40
+4,Shailendra Gaikwad,Person,9,40
 5,Shashi Tharoor,Person,9,10
 6,Harshad Ramniklal Mehta,Person,9,15
 7,Subrata Roy,Person,10,100
