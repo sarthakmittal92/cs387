@@ -1,0 +1,3 @@
+select * from team;
+insert into team(team_id, team_name) values(112, 'MJW');
+select * from team;
