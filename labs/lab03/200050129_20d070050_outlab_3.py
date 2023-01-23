@@ -2,20 +2,15 @@ import argparse
 import psycopg2
 import sys
 import csv
-from psycopg2.extras import execute_values
-
-edges = None
-toposort = None
-visited = None
 
 def table_schema(cursor,table):
     cursor.execute(f'''
-                    select column_name, data_type
+                    select column_name, data_type, character_maximum_length
                     from information_schema.columns
                     where table_name = '{table}'
                     order by ordinal_position;
     ''')
-    cols = ',\n'.join(map(lambda x: x[0] + ' ' + x[1],cursor.fetchall()))
+    cols = ',\n'.join(map(lambda x: x[0] + ' ' + x[1] + f' ({x[2]})' if x[2] is not None else x[0] + ' ' + x[1],cursor.fetchall()))
     cursor.execute(f'''
                     select c.column_name, c.data_type
                     from information_schema.table_constraints tc
@@ -39,7 +34,7 @@ def table_schema(cursor,table):
     ''')
     fk = ',\n'.join(map(lambda x: x[1],cursor.fetchall()))
     if fk != '':
-        fk += ',\n'
+        pk += ',\n'
     cursor.execute(f'''
                     select column_name
                     from information_schema.table_constraints as c
@@ -48,7 +43,9 @@ def table_schema(cursor,table):
                     where c.constraint_type = 'UNIQUE';
     ''')
     unique = ',\n'.join(map(lambda x: f'UNIQUE ({x[0]})',cursor.fetchall()))
-    out = f'''CREATE TABLE {table} (\n{cols},\n{pk},\n{fk}{unique});\n'''
+    if unique != '':
+        fk += ',\n'
+    out = f'''CREATE TABLE {table} (\n{cols},\n{pk}{fk}{unique});\n'''
     print(out)
 
 def fk_pk_pairs(cursor):

@@ -5,6 +5,7 @@ python3 200050129_20d070050_outlab_3.py --name lab3db --user postgres --pswd 123
 python3 200050129_20d070050_outlab_3.py --name lab3db --user postgres --pswd 1234 --host 127.0.0.1 --port 5432 --show-tables > iamout2.txt
 
 # Outlab 3 Q3
+rm iamout3.txt
 for file in ./lab3_resources/csvs/*
 do
     table=$(basename -- ${file%.*})
