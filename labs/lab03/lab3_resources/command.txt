@@ -1,3 +1,4 @@
 select * from team;
+delete from team where team_id = 113;
 insert into team(team_id, team_name) values(113, 'MJW');
 select * from team;
