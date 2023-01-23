@@ -12,9 +12,10 @@ def table_schema(cursor,table):
     cursor.execute(f'''
                     select column_name, data_type
                     from information_schema.columns
-                    where table_name = '{table}';
+                    where table_name = '{table}'
+                    order by ordinal_position;
     ''')
-    cols = ','.join(map(lambda x: x[0] + ' ' + x[1],cursor.fetchall()))
+    cols = ',\n'.join(map(lambda x: x[0] + ' ' + x[1],cursor.fetchall()))
     cursor.execute(f'''
                     select c.column_name, c.data_type
                     from information_schema.table_constraints tc
@@ -24,17 +25,21 @@ def table_schema(cursor,table):
                     on c.table_schema = tc.constraint_schema and tc.table_name = c.table_name and ccu.column_name = c.column_name
                     where constraint_type = 'PRIMARY KEY' and tc.table_name = '{table}';
     ''')
-    pk = ','.join(map(lambda x: f'PRIMARY KEY ({x[0]})',cursor.fetchall()))
+    pk = 'PRIMARY KEY (' + ','.join(map(lambda x: x[0],cursor.fetchall())) + ')'
     cursor.execute(f'''
-                    select kcu.column_name, ccu.table_name as foreign_table_name, ccu.column_name as foreign_column_name 
-                    from information_schema.table_constraints as tc
-                    join information_schema.key_column_usage as kcu
-                    on tc.constraint_name = kcu.constraint_name and tc.table_schema = kcu.table_schema
-                    join information_schema.constraint_column_usage as ccu
-                    on ccu.constraint_name = tc.constraint_name and ccu.table_schema = tc.table_schema
-                    where tc.constraint_type = 'FOREIGN KEY' and tc.table_name='{table}';
+                    select cls.relname, pg_get_constraintdef(pgc.oid)
+                    from pg_constraint pgc
+                    join pg_namespace nsp
+                    on nsp.oid = pgc.connamespace
+                    join pg_class cls
+                    on pgc.conrelid = cls.oid
+                    left join information_schema.constraint_column_usage ccu
+                    on pgc.conname = ccu.constraint_name and nsp.nspname = ccu.constraint_schema
+                    where contype = 'f' and relname = '{table}'; 
     ''')
-    fk = ','.join(map(lambda x: f'FOREIGN KEY ({x[0]}) references {x[1]}({x[2]})',cursor.fetchall()))
+    fk = ',\n'.join(map(lambda x: x[1],cursor.fetchall()))
+    if fk != '':
+        fk += ',\n'
     cursor.execute(f'''
                     select column_name
                     from information_schema.table_constraints as c
@@ -42,15 +47,8 @@ def table_schema(cursor,table):
                     using (table_schema, table_name, constraint_name)
                     where c.constraint_type = 'UNIQUE';
     ''')
-    unique = ','.join(map(lambda x: f'UNIQUE ({x[0]})',cursor.fetchall()))
-    out = f'''
-        create table {table} (
-            {cols},
-            {pk},
-            {fk},
-            {unique}
-    );
-    '''
+    unique = ',\n'.join(map(lambda x: f'UNIQUE ({x[0]})',cursor.fetchall()))
+    out = f'''CREATE TABLE {table} (\n{cols},\n{pk},\n{fk}{unique});\n'''
     print(out)
 
 def fk_pk_pairs(cursor):
