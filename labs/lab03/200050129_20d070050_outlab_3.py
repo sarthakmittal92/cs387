@@ -22,7 +22,7 @@ def table_schema(cursor,table):
     ''')
     pk = 'PRIMARY KEY (' + ','.join(map(lambda x: x[0],cursor.fetchall())) + ')'
     cursor.execute(f'''
-                    select cls.relname, pg_get_constraintdef(pgc.oid)
+                    select pg_get_constraintdef(pgc.oid)
                     from pg_constraint pgc
                     join pg_namespace nsp
                     on nsp.oid = pgc.connamespace
@@ -32,17 +32,21 @@ def table_schema(cursor,table):
                     on pgc.conname = ccu.constraint_name and nsp.nspname = ccu.constraint_schema
                     where contype = 'f' and relname = '{table}'; 
     ''')
-    fk = ',\n'.join(map(lambda x: x[1],cursor.fetchall()))
+    fk = ',\n'.join(map(lambda x: x[0],cursor.fetchall()))
     if fk != '':
         pk += ',\n'
     cursor.execute(f'''
-                    select column_name
-                    from information_schema.table_constraints as c
-                    join information_schema.constraint_column_usage as cc
-                    using (table_schema, table_name, constraint_name)
-                    where c.constraint_type = 'UNIQUE';
+                    select distinct pg_get_constraintdef(pgc.oid)
+                    from pg_constraint pgc
+                    join pg_namespace nsp
+                    on nsp.oid = pgc.connamespace
+                    join pg_class cls
+                    on pgc.conrelid = cls.oid
+                    left join information_schema.constraint_column_usage ccu
+                    on pgc.conname = ccu.constraint_name and nsp.nspname = ccu.constraint_schema
+                    where contype = 'u' and relname = '{table}';
     ''')
-    unique = ',\n'.join(map(lambda x: f'UNIQUE ({x[0]})',cursor.fetchall()))
+    unique = ',\n'.join(map(lambda x: x[0],cursor.fetchall()))
     if unique != '':
         fk += ',\n'
     out = f'''CREATE TABLE {table} (\n{cols},\n{pk}{fk}{unique});\n'''

@@ -6,5 +6,6 @@ drop table if exists mittal;
 create table mittal (
     id VARCHAR(50),
     val INT,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (id, val)
 );
