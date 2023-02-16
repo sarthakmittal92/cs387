@@ -1,0 +1,26 @@
+from pyspark import SparkConf, SparkContext
+import re, argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--n', type=str, required=True)
+parser.add_argument('--k', type=str, required=True)
+args = parser.parse_args()
+n = int(args.n)
+k = int(args.k)
+
+conf = SparkConf().setAppName("outlab5").setMaster("local")
+sc = SparkContext(conf=conf)
+print("_"*40)
+distData = sc.wholeTextFiles("./datadir")
+alpha = distData.map(lambda x: x[1]).map(lambda x: re.sub(r"\n", " ", x)).map(lambda x: re.sub(r"[^a-z0-9 .]", "", x.lower())).map(lambda x: re.sub(r"\.", " $.", x)).map(lambda x: x.split(".")).reduce(lambda x, y: x+y)
+beta = sc.parallelize(alpha).filter(lambda x: x).map(lambda x: x.split()).collect()
+prefixes = sc.parallelize(beta).map(lambda x: [x[max(dumdum-k,0):1+dumdum] for dumdum in range(len(x))]).reduce(lambda x, y: x+y)
+pairs = sc.parallelize(prefixes).map(lambda x: (x[:-1], x[-1])).filter(lambda x: True if x[0]!=[] else False).collect()
+prefixnums = sc.parallelize(pairs).filter(lambda x: True if len(x[0])<=k else False).map(lambda x: (", ".join(x[0]), x[1])).countByKey()
+pairnums = sc.parallelize(pairs).filter(lambda x: True if len(x[0])<=k else False).map(lambda x: ", ".join(x[0]) + ": " + x[1]).countByValue()
+probs = sc.parallelize(pairnums).map(lambda x: (x.split(":")[0], x.split(":")[1], pairnums[x])).map(lambda x: [x[0], (x[1], x[2]/prefixnums[x[0]])]).groupByKey().map(lambda x: (x[0], sorted(x[1], key=lambda x: -x[1]))).map(lambda x: (x[0], x[1][:n])).collect()
+towrite = sc.parallelize(probs).map(lambda x: [(x[0], x[1][i]) for i in range(len(x[1]))]).reduce(lambda x, y: x+y)
+finalwrite = sc.parallelize(towrite).map(lambda x: x[0]+":"+x[1][0]+" "+str(x[1][1])+"\n").collect()
+f = open("./output.txt", "w")
+f.writelines(finalwrite)
+f.close()
