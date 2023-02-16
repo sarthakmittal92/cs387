@@ -23,6 +23,4 @@ pairnums = sc.parallelize(pairs).filter(lambda x: True if len(x[0])<=k else Fals
 probs = sc.parallelize(pairnums).map(lambda x: (x.split(":")[0], x.split(":")[1], pairnums[x])).map(lambda x: [x[0], (x[1], x[2]/prefixnums[x[0]])]).groupByKey().map(lambda x: (x[0], sorted(x[1], key=lambda x: -x[1]))).map(lambda x: (x[0], x[1][:n])).collect()
 towrite = sc.parallelize(probs).map(lambda x: [(x[0], x[1][i]) for i in range(len(x[1]))]).reduce(lambda x, y: x+y)
 finalwrite = sc.parallelize(towrite).map(lambda x: x[0]+":"+x[1][0]+" "+str(x[1][1])+"\n").collect()
-f = open("./output.txt", "w")
-f.writelines(finalwrite)
-f.close()
+print((''.join(finalwrite)).strip())
