@@ -13,7 +13,8 @@ PRIMARY KEY (match_id,innings_no,over_id,ball_id),
 FOREIGN KEY (match_id) REFERENCES match(match_id) ON DELETE SET NULL,
 FOREIGN KEY (striker) REFERENCES player(player_id) ON DELETE SET NULL,
 FOREIGN KEY (non_striker) REFERENCES player(player_id) ON DELETE SET NULL,
-FOREIGN KEY (bowler) REFERENCES player(player_id) ON DELETE SET NULL);
+FOREIGN KEY (bowler) REFERENCES player(player_id) ON DELETE SET NULL,
+UNIQUE (val));
 
 CREATE TABLE match (
 match_id integer,
@@ -34,7 +35,8 @@ FOREIGN KEY (team1) REFERENCES team(team_id) ON DELETE SET NULL,
 FOREIGN KEY (team2) REFERENCES team(team_id) ON DELETE SET NULL,
 FOREIGN KEY (toss_winner) REFERENCES team(team_id) ON DELETE SET NULL,
 FOREIGN KEY (match_winner) REFERENCES team(team_id) ON DELETE SET NULL,
-FOREIGN KEY (man_of_match) REFERENCES player(player_id) ON DELETE SET NULL);
+FOREIGN KEY (man_of_match) REFERENCES player(player_id) ON DELETE SET NULL,
+UNIQUE (val));
 
 CREATE TABLE owner (
 owner_id integer,
@@ -43,7 +45,8 @@ owner_type text,
 team_id integer,
 stake integer,
 PRIMARY KEY (owner_id),
-FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL);
+FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
+UNIQUE (val));
 
 CREATE TABLE player (
 player_id integer,
@@ -52,7 +55,8 @@ dob date,
 batting_hand text,
 bowling_skill text,
 country_name text,
-PRIMARY KEY (player_id));
+PRIMARY KEY (player_id),
+UNIQUE (val));
 
 CREATE TABLE player_match (
 playermatch_key bigint,
@@ -63,18 +67,21 @@ team_id integer,
 PRIMARY KEY (playermatch_key),
 FOREIGN KEY (match_id) REFERENCES match(match_id) ON DELETE SET NULL,
 FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE SET NULL,
-FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL);
+FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE SET NULL,
+UNIQUE (val));
 
 CREATE TABLE team (
 team_id integer,
 team_name text,
-PRIMARY KEY (team_id));
+PRIMARY KEY (team_id),
+UNIQUE (val));
 
 CREATE TABLE umpire (
 umpire_id integer,
 umpire_name text,
 country_name text,
-PRIMARY KEY (umpire_id));
+PRIMARY KEY (umpire_id),
+UNIQUE (val));
 
 CREATE TABLE umpire_match (
 umpirematch_key bigint,
@@ -83,7 +90,8 @@ umpire_id integer,
 role_desc text,
 PRIMARY KEY (umpirematch_key),
 FOREIGN KEY (match_id) REFERENCES match(match_id) ON DELETE SET NULL,
-FOREIGN KEY (umpire_id) REFERENCES umpire(umpire_id) ON DELETE SET NULL);
+FOREIGN KEY (umpire_id) REFERENCES umpire(umpire_id) ON DELETE SET NULL,
+UNIQUE (val));
 
 CREATE TABLE venue (
 venue_id integer,
@@ -91,5 +99,6 @@ venue_name text,
 city_name text,
 country_name text,
 capacity integer,
-PRIMARY KEY (venue_id));
+PRIMARY KEY (venue_id),
+UNIQUE (val));
 

@@ -5,6 +5,6 @@ select * from team;
 drop table if exists mittal;
 create table mittal (
     id VARCHAR(50),
-    val INT,
+    val INT unique,
     PRIMARY KEY (id)
 );
