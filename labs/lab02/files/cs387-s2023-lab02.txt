@@ -17,7 +17,7 @@ in a from clause. The set-valued function generate_series is postgresql specific
 work in other databases, but can be implemented using recursive queries which will be covered
 later.
 
-4. The genre field of movies is a string value field with multiple values.  Convert it to a
+4. The genre field of movies is a string value field with multiple values. Convert it to a
 normalized value. Your output schema should be    
     movieid, title, genre
 Replacing genres by genre, and given a tuple like (id1, 'foo', 'Comedy|Drama'), the output

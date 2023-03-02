@@ -1,8 +1,8 @@
 with msdb as (
     select avg(rat * c) from (
-        select ratings.movieId, avg(rating) as rat, count(title) as c, genres from ratings join
+        select ratings.movieId, avg(rating) as rat, count(title) as c from ratings join
         movies on ratings.movieId = movies.movieId where
-        genres ilike '%comedy%' group by ratings.movieId, genres
+        genres ilike '%comedy%' group by ratings.movieId
     )
 as temp),
 dramadb as (
