@@ -1,0 +1,43 @@
+You have to write a python program named <roll_no1>_<roll_no2>_outlab_3.py, which supports the
+following flags, and the output should be flushed to the standard output stream.
+
+In this part of the assignment you will need to query the postgresql information schema to get
+the necessary information.
+
+1. "--import-sql --path <file_path>" - load sql statements from the file "<file_path>" into the
+database. (5 marks)
+
+2. "--show-tables" - output the list of tables in the given database sorted alphabetically and
+each table name on a new line. Do NOT include system tables in this list. (10 marks)
+
+3. "--show-table-schema --table <table_name>" - output the table's schema such that it can be
+run to create the table. The output should thus be in the form of
+    create table <table_name> (
+        column_1 datatype<(optional character length of the datatype)>,
+        column_2 datatype<(optional character length of the datatype)>,
+        ...
+        column_n datatype<(optional character length of the datatype)>,
+        PRIMARY KEY (column_i, column_j, column_k, ...),
+        FOREIGN KEY (column_p1, column_q1, column_r1, ...) references table_u1(column_x1, column_y1, column_z1, ...) <ON DELETE STATEMENT if specified in schema>,
+        ...
+        FOREIGN KEY (column_pn, column_qn, column_rn, ...) references table_un(column_xn, column_yn, column_zn, ...) <ON DELETE STATEMENT if specified in schema>,
+        UNIQUE (column_a1, column_b1,...),
+        ...
+        UNIQUE (column_am, column_bm,...)
+    );
+Note that the order of the columns should be maintained. You can ignore any other type of
+constraints and indices while dumping the schema. Any order of columns in constraints and the
+order of constraints will be fine. The mapping of columns in the foreign keys should be correct.
+You should handle any arbitrary valid datatype of the columns. (30 marks)
+
+4. "--export-database-schema" - output the complete schema of the database. The challenge here
+is to output these in such a manner that foreign key constraints are not violated. You may
+assume that the schema does not involve complex elements such as indices, views, etc. There are
+no constraints other than primary key, foreign key and unique constraints. The output should
+contain only create table statements. Any order of output that runs without errors will work.
+(30 marks)
+
+The program will be run as:
+    python3 <roll_no1>_<roll_no2>_outlab_3.py --name <database_name> --user <username> --pswd <password> --host <host_address> --port <port>
+followed by one of the above sets of flags. Each part will be auto-graded independently of
+other parts.

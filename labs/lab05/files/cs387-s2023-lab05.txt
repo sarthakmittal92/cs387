@@ -1,0 +1,35 @@
+In this assignment you are given input text data file(s). You have to implement Spark Program
+to predict subsequent phrase based on previous k words. There are 2 parts in this assignment. 
+
+Given input data, and parameters n and k,  for each sequences of 1 to k words that occurs in
+the input data, find the n words that have the most probability of occurring next (with their
+probabilities). End of sentence should be treated as a special word $. Output the data in the
+form:
+    w1, .. wi: S1 p1
+    …
+    w1,... wi: Sn pj
+For i <= k, and j <= n. Note that $ is a valid word above.
+
+E.g. for k=3, you may get outputs such as:
+    shah: rukh .5
+    shah: is .5
+    shah, rukh: khan 1
+    shah, rukh, khan: is .5
+    shah, rukh, khan: acted .5
+    acted in pathan: $ 1
+Note that $ will not occur on the LHS, only on RHS.
+
+To do so, first find the counts for each combination as above, and then in a subsequent reduce
+step find the totals, divide and output the most probable n words. If the data has only 1
+possibility, output it as is.
+
+If we give plain text files: Note that by default files are broken into records based on new
+line. This should be overridden to ensure sentences are treated properly even if there is a
+newline within the sentence. In Python you can do this using: 
+    spark.read.text(path, wholetext=True)
+
+Convert upper case to lower case, and replace "." by " $ " (i.e. spaces on either side), remove
+all special characters other than alphabets and numbers, before tokenizing based on space.
+
+Note that the computation should use Spark for all the steps, and should not just do it using
+Python.

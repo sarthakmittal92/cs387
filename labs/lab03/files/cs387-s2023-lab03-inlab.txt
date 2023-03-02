@@ -1,0 +1,32 @@
+You have to write a python program named <roll_no1>_<roll_no2>_inlab_3.py, which supports the
+following flags, and the output should be flushed to the standard output stream.
+
+In this part of the assignment, you should use the cursor description feature of psycopg to get
+the names of the columns present in the table. Load ipl.ddl file in the database before running
+the python file (it is not meant to be loaded through the python submission file).
+
+1. "--import-table-data --table <table_name> --path <csv_path>" - load the csv file at
+"<csv_path>" (absolute path) into the table "<table_name>". The first row in the csv file
+contains the header. Use execute_values, which is faster than execute API for multiple inserts.
+You can assume schema matches and don't need to check for schema differences. (10 marks)
+
+Empty strings in input csv file are to be stored as empty strings in the database. Make sure
+you perform a commit() on the connection after inserting all the rows, so that all the updates
+are reflected in the database. Otherwise the updates will not reflect in the database, and will
+be rolled back when the connection is closed (JDBC drivers default to "autocommit" where each
+command commits immediately. You can do that in psycopg also by setting the appropriate
+connection parameter but for this assignment don't use that. Also, it is better to commit after
+inserting some number of rows say 100K or 1M, just in case you have a very large input file,
+since PostgreSQL may have performance issues if there are a very large number of uncommitted
+inserts).
+
+2. "--export-table-data --table <table_name> --format <format> --path <csv_path>" where format
+= "csv" or "sql". If format = "sql", then output the insert statements used to create the rows
+of this table. If format = "csv", include the column names in the first row in the right order,
+comma separated. If path is specified output should go that file, else to terminal. (15 marks)
+DO NOT use the copy command for this part.
+
+The program will be run as:
+    python3 <roll_no1>_<roll_no2>_inlab_3.py --name <database_name> --user <username> --pswd <password> --host <host_address> --port <port>
+followed by one of the above sets of flags. Each part will be auto-graded independently of
+other parts.

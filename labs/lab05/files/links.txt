@@ -1,0 +1,15 @@
+https://db-book.com/slides-dir/PDF-dir/ch10.pdf
+Spark home:   https://spark.apache.org/ 
+Spark quick start: creating applications:
+Read:   http://spark.apache.org/docs/latest/quick-start.html#self-contained-applications
+The page also has stuff  on the Spark Shell.
+Spark programming guide:  http://spark.apache.org/docs/latest/programming-guide.html
+The guide has information for 3 languages: Scala, Java and Python.  
+Spark Java API docs:  http://spark.apache.org/docs/latest/api/java/index.html
+Spark DataSet Java API:  http://spark.apache.org/docs/latest/api/java/index.html#org.apache.spark.sql.functions
+Some Spark/Java8 examples
+https://github.com/apache/spark/tree/master/examples/src/main/java/org/apache/spark/examples
+http://blog.cloudera.com/blog/2014/04/making-apache-spark-easier-to-use-in-java-with-java-8/
+https://github.com/ypriverol/spark-java8
+PySpark Tutorial: https://towardsdatascience.com/beginners-guide-to-pyspark-bbe3b553b79f
+https://www.kaggle.com/datasets/jensenbaxter/10dataset-text-document-classification

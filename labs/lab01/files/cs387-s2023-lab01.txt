@@ -1,0 +1,25 @@
+1) [RA and SQL] Display names of all persons in university - whether student or instructor.
+Remove duplicates in SQL; relational algera already removes duplicates.
+
+2) [RA and SQL] Display course_id and title and instructor ID of all courses in university.
+
+3) [RA and SQL] List ID, name and salary of all instructors with salary less than 75000.
+
+4) [RA and SQL] List count of instructor in each department.
+
+5) [RA and SQL] Find title, course_id of all courses that have a prereq, with the course ID of
+the prereq in that order.
+
+6) [SQL Only] Find names of instructors with salary more than 10% of department budget.
+
+7) [SQL Only] Find dept_name of all departments that co-exist with at least one other department
+in a building.
+
+8) [SQL Only] Assuming each student pays fees of 5000, find the total income of each
+department.
+
+9) [SQL Only] Find IDs and names of all students who have taken a course in the 'Comp. Sci.'
+department as well as a course in the 'Biology' department  (not necessarily in the same
+semester). Eliminate duplicates.
+
+10)[SQL Only] Find instructors who are not teaching any course nor advising any student.

@@ -1,0 +1,5 @@
+https://www.psycopg.org/docs/
+https://zetcode.com/python/psycopg2/ 
+https://www.postgresql.org/docs/current/catalogs.html
+https://www.postgresql.org/docs/current/information-schema.html
+https://www.postgresql.org/docs/14/functions-info.html
