@@ -1,5 +1,5 @@
 1) [RA and SQL] Display names of all persons in university - whether student or instructor.
-Remove duplicates in SQL; relational algera already removes duplicates.
+Remove duplicates in SQL; relational algebra already removes duplicates.
 
 2) [RA and SQL] Display course_id and title and instructor ID of all courses in university.
 
