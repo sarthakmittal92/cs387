@@ -18,8 +18,8 @@ in a building.
 8) [SQL Only] Assuming each student pays fees of 5000, find the total income of each
 department.
 
-9) [SQL Only] Find IDs and names of all students who have taken a course in the 'Comp. Sci.'
+9)[SQL Only] Find instructors who are not teaching any course nor advising any student.
+
+10) [SQL Only] Find IDs and names of all students who have taken a course in the 'Comp. Sci.'
 department as well as a course in the 'Biology' department  (not necessarily in the same
 semester). Eliminate duplicates.
-
-10)[SQL Only] Find instructors who are not teaching any course nor advising any student.
