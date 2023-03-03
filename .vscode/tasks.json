@@ -1,0 +1,17 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run PostgreSQL",
+            "type": "shell",
+            "command": "/home/sarthak/IITB/GitHub/courses/cs387/labs/lab06/postgresql/install/bin/postgres",
+            "args": ["--single", "-D", "/home/sarthak/IITB/GitHub/courses/cs387/labs/lab06/postgresql/install/data", "testDB"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
