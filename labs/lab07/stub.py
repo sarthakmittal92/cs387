@@ -53,8 +53,24 @@ if __name__ == "__main__":
 	# Query 1
 	if(sys.argv[1] == "q1"):
 		# Write query here
+		query = sampleDataframe.selectExpr("CAST(value AS STRING)")
+		query = query.select(split('value', ',').alias('value'))
+		output = query.select(*[query['value'][i] for i in range(4)])
+		output = output.withColumnRenamed("value[0]", "value0")\
+		.withColumnRenamed("value[1]", "value1")\
+		.withColumnRenamed("value[2]", "value2")\
+		.withColumnRenamed("value[3]", "value3")
+		output = output.withColumn('timestamp', unix_timestamp(col('value3'), "d MMMM yyyy").cast(TimestampType()))
+		output = output.selectExpr("value1 as movieId", "value0 as user", "cast(value2 as int) as rating", 'value3', 'timestamp', 'day(timestamp) as day', 'month(timestamp) as month', 'year(timestamp) as year')
 		t.start()
 		# Write the query output to Kafka topic 'output' with waiting time of termination being 120 seconds
+		# time.sleep(25)
+		print("Producing messages")
+		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
+		for row in output:
+			message = ','.join(row).encode('utf-8')
+			producer.send('output', message)
+		producer.close()
 		t.join()
 
 	# Query2
@@ -78,6 +94,3 @@ if __name__ == "__main__":
 		t.start()
 		# Write the query output to Kafka topic 'output' with waiting time of termination being 120 seconds
 		t.join()
-
-
-
