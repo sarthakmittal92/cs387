@@ -1,0 +1,75 @@
+Note: To be done in teams of 2 people
+
+First you need to understand streaming data concepts that will be covered at the start of the
+lab. You can also see Chapter 10 of the database system concepts book.   
+
+In this assignment you will set up a Kafka server, and do streaming data analytics using Spark
+Streaming. Here's a small tutorial introducing some relevant terms:
+    https://www.macrometa.com/event-stream-processing/spark-structured-streaming
+Here's a link to more information on Spark Streaming:
+    https://spark.apache.org/docs/latest/streaming-programming-guide.html
+
+Dataset: IMDB ratings dataset (movieid, userid, rating, timestamp).
+
+Click on this link to download the dataset: data.csv.gz
+(https://drive.google.com/file/d/16EDkYg0X7B8-TUWFLnsGWQnKb3FpEW-_/view?usp=share_link) 
+
+    Each row in this dataset is as follows:
+        userID, movieID, rating, review date
+    For example : 
+        ur18238764, tt2177461, 9, 22 January 2019
+
+This 29 MB dataset dataset is derived from a larger dataset of ratings of movies by users.
+(The original dataset is much larger at 600+ MB, and contains 4669820 ratings from 1499238
+users to 351109 movies on the imdb.com website) This data is collected from reviews
+(https://www.imdb.com/review/rw0000001/). ;
+
+Kafka
+
+Your first task is to set up a Kafka service. Follow the instructions here to setup Kafka:
+https://kafka.apache.org/quickstart (you can stop with Step 6, no need to do Step 7)
+
+The instructions above show how to check that the service is working. You can alternatively
+follow the instructions at two other sites, which should work on linux, mac and WSL:
+    https://sparkbyexamples.com/kafka/apache-kafka-cluster-setup/ 
+    https://www.conduktor.io/kafka/how-to-install-apache-kafka-on-linux/ 
+
+After that you need to feed the sample dataset to Kafka, and then consume it from a Spark
+Streaming program. To make your life easier we have provided you with stub code for Spark
+Streaming from Kafka which is uploaded on Moodle. Use that as the starting point for the main
+part of the assignment. 
+
+Spark Queries:
+
+You must have set up spark already.
+
+Write the following queries using Spark Streaming. The ratings can be assumed to be streaming
+in sorted date order. You can read from file initially, and later switch to Kafka (which is
+required as part of the assignment, see below):
+
+    1. Find the average rating of each movie in each month where there was a review for the
+    movie. Print the movieid, year/month and average rating
+
+    2. Find users who had more than 10 reviews in a month, display userid with the year/month
+
+    3. Find users who have given average rating of > 5 for movies in any one month.
+    Output the userid, year/month and average rating
+
+    4. Find movies which had more than 100 ratings in a single day, along with the day
+
+    5. (STRICTLY OPTIONAL) These queries require stateful aggregates, which are to come to
+    PySpark 3.4, so save them for the future. (Java/Scala Spark already has support). You may
+    be able to do them by writing data back to a data stream, and reading it back for further
+    aggregation. You can try them for extra credit.
+
+        1. Find movies that had 100 ratings every day for 7 consecutive days.
+
+        2. For first month, print ratings of all movies, From 2nd month only print those
+        movies whose ratings have gone up/down by X% (say X= 20), or there is no rating for
+        that movie in the previous month, or there is a rating for the movie in the previous
+        month but not in the current month. You will need to save state.
+
+Submission Instructions:
+
+Submit the spark streaming program which you created starting with stub.py (rename it as
+rollno1_rollno2_streaming.py).

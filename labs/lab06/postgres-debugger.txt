@@ -1,0 +1,22 @@
+Go to backend>main and open main.c. Scroll down and you will find a call to PostgresMain,
+which is the actual main function for the backend
+
+Use open declaration on Eclipse to open the file containing PostgresMain() (this is in
+postgres.c)
+
+Scroll down and you will find that simple queries are executed by calling exec_simple_query().
+
+Open the declaration of that function. (This is also in postgres.c)
+
+You can see what are the key steps in processing a simple query in this function. You can set
+breakpoints at pg_analyze_and_rewrite and at pg_plan_queries to see how a query is planned.
+
+A "portal" is a ready-to-execute statement, and PortalRun executes the statement. Here's a partial call sequence for executing a select query.
+    1. ExecutorRun
+    2. ExecutePlan
+    3. ExecProcNode (this is a function pointer in plan, which is used to call the appropriate
+    function depending on the operator type; execProcnode.c has more details). See the header
+    notes in execProcnode.c for a more detailed example of the execution sequence.
+    4. Here are some files that help understand what is happening:
+        Access methods: Look at header comments of access/heap/heapam.c, access/index/indexam.c
+        and access/nbtree/nbtree.c

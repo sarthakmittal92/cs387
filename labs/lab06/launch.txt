@@ -1,0 +1,5 @@
+First create a launch.json by following the steps in this page:
+    https://code.visualstudio.com/docs/editor/debugging
+
+Then add the contents of launch.json to your just created launch.json to enable debugging.
+Make sure to edit the paths to match yours before you use it.

@@ -1,0 +1,248 @@
+Modified from http://wiki.postgresql.org/wiki/Working_with_Eclipse
+
+Requirements: Ubuntu OS, Eclipse for C/C++, git
+
+1. Setting up PostgreSQL Using GIT (For VSCode you can find equivalent instructions)
+
+    1. Eclipse should have git built in. If your version does not, first install git support
+    by using Help > Install New Software.
+    For VSCode, you can find more instructions here:
+    https://code.visualstudio.com/docs/sourcecontrol/overview
+    Search around for how to clone/import a project
+
+    2. Make sure C/C++ development support (including debugging) is enabled on your IDE by
+    installing the appropriate extensions. Then go to the next step.
+
+    3. In Eclipse: Open File => Import, select Git => Projects from Git and click Next.
+    Select "URI" and click Next.
+    Now you will have to enter the repository's location as
+    https://git.postgresql.org/git/postgresql.git
+    In VSCode, from the main window click on Clone Git Repository and enter above location.
+
+    4. For Eclipse Deselect all branches, then select 14 (or 14.5) Stable and proceed to clone
+    Postgresql.
+    VSCode seems to just select latest branch.
+
+    5. After this software is downloaded, which may take a while.
+
+    6. For Eclipse:
+        1. Finally you will come to a software import wizard. Choose New Project Wizard and
+        click on next.
+        2. Select the C/C++, Makefile Project with Existing Code and click next; you will then
+        have to enter the code location which will be of the form "homedir/git/postgresql"
+        (replace "homedir" with your home directory path, e.g. /home/sudarsha).
+        3. Click on Finish
+        4. Your project should now be ready (under the name "postgresql")
+
+    7. For VSCode:  
+        1. Open a terminal to the location where postgres was intalled.
+        2. Change the branch using git checkout REL_14_STABLE
+
+    8. Don't try building your project using Eclipse/VSCode yet. Follow steps below first to
+    configure eclipse, before doing a make.
+
+2. Configuring PostgreSQL
+    - IMPORTANT: Read all instructions in this section, and then follow the steps in below to
+    set up environment variables and then configure, build, and install postgresql.
+
+    - In case the make fails during build due to missing libraries, make sure they are
+    installed using your Ubuntu software center or synaptic package manager (or equivalent).
+    Some of the packages that are often missing and needed are:
+        libreadline6-dev
+        zlib1g-dev
+        bison
+        flex
+
+    - First time build and setup
+
+        1. Set the following variables appropriately:
+            export POSTGRES_INSTALLDIR=<path to install dir>
+            export POSTGRES_SRCDIR=<path to postgre source dir>
+            cd ${POSTGRES_SRCDIR}
+
+        NOTE 1:
+        source dir is the main directory where you your postgresql source resides. 
+        installdir is the directory where you want the database to be created.
+        One option is to make INSTALLDIR to be SRCDIR/install.
+
+        NOTE 2:
+        Add all the export lines in this file to a file called, say, bashrc, so you can
+        source that file in future before running any postgresql commands.
+
+        2. Configure PostgreSQL for debugging as follows:
+
+            1. First edit the file configure and replace -O2 in CFlags by -O0 in all
+            occurrences except BITCODE_CFLAGS (there are about 6 places).
+
+            2. Then run the following:
+                ./configure --prefix=${POSTGRES_INSTALLDIR} --enable-debug
+                export enable_debug=yes
+
+                NOTE: If you change the configuration (e.g. O2 above) after running configure,
+                do a make distclean and then run configure again as above.
+
+            3. Compile the PostgreSQL code as follows
+                make | tee gmake.out
+            In case the make fails due to missing libraries, make sure they are installed
+            using your Ubuntu software center or synaptic package manager (or equivalent).
+            Some of the packages that are often missing and needed are:
+                libreadline6-dev
+                zlib1g-dev
+                bison
+                flex
+
+            4. Run
+                make install | tee gmake_install.out
+
+            5. Set the following env. variables appropriately (as shown below):
+                export LD_LIBRARY_PATH=${POSTGRES_INSTALLDIR}/lib:${LD_LIBRARY_PATH}
+                export PATH=${POSTGRES_INSTALLDIR}/bin:${PATH}
+                export PGDATA=${POSTGRES_INSTALLDIR}/data
+
+            6. Create a new PostgreSQL database cluster by using initdb as below. The command
+            initdb below is in the install/bin directory
+                initdb -D ${PGDATA}
+                or install/bin/initdb -D ${PGDATA}
+            Note: A database cluster is a collection of databases that are managed by a single
+            server instance.
+
+            7. If you have a copy of PostgreSQL already running on your system, change the
+            port on which postgresql listens from the default of 5432 to some other port.
+            Otherwise there will be a port clash.  To do this,
+                edit ${POSTGRES_INSTALLDIR}/data/postgresql.conf
+            uncomment #port=5432 by removing  the # and change the port from 5432 to (say) 9432.
+            You will need to subsequently connect to the port number you choose.
+
+            8. Run the postgres server: The command pg_ctl below is in the install/bin diretory
+                pg_ctl -D $PGDATA -l logfile start
+            (you can also use: postmaster -D $PGDATA > logfile 2>&1 &)
+
+            9. If you intend to connect from a machine other than the one you are running on,
+            you will have to edit postgresql.conf and pg_hba.conf.
+            Instructions will be added here later.
+
+            10. Create database: (we assume here that you used post number as 9432 above, and
+            the database name is test  but you can use any other name).
+            The command createdb below is in the install/bin diretory
+                createdb -p 9432 test
+
+            11. Run the psql (client program). The command psql below is in the install/bin
+            diretory
+                psql -p 9432 test
+            You can now type SQL commands. You can also type \? to see what are the available
+            other commands.
+
+            12. When you are done running commands, stop the server. The command pg_ctl below
+            is in the install/bin diretory
+                pg_ctl stop
+
+            13. To run postgresql in single user mode (very useful for debugging when you
+            modify the sources), run it as
+                postgres --single -D ${PGDATA} test
+            (where test is the database you created).
+            Now you can directly enter SQL commands, instead of connecting via psql.
+
+            14. To run postgresql in single mode from eclipse, add
+                -- single -D <PGDATA> test
+            as command line arguments in the run time environment; change <PGDATA> to the full
+            path. Now you can use the eclipse debugger.
+
+            15. You can now run sql commands. Eg.
+                create table foo(i int);
+                insert into foo values (1);
+                select * from foo;
+
+When you modify the sources:
+
+Most of your testing will be in single mode, from eclipse, using the eclipse debugger. 
+When you make changes to source files, using eclipse IDE to stop the server,
+Run make and make install as described earlier, then run the server again from the IDE in
+debug mode.
+If running from command line stop the postgres server: pg_ctl stop, rebuild the code using
+make and make install, and then start the server and connect to it again.
+
+Connecting to a remote postgres server
+
+*. psql client should be invoked in the following manner, if the postgres server is running on a different machine. 
+    psql -h <hostname on which postgres server runs> -p <portnumber> test
+
+To execute a query from command line:
+    psql -p <portnumber> test --command "<query>"
+  	e.g: psql test --command "select * from ch_user;"
+
+Running a stand alone postgres
+    postgres  -D  $PGDATA test
+
+Run Configurations in Eclipse:
+
+    1. First make sure you have configured postgresql, created a database, run postgresql in
+    single mode successfully. After that, switch back to Eclipse. Select the Project Explorer
+    view. If you cannot see it, add it with the button in the left bottom.
+    In the Project Explorer view right click on the Projectname (postgres or postgresql-14),
+    and select "Run As >> Run Configurations".
+
+    2. Select "C/C++ Application:", and click on the new configuration button on the top left
+    (the text on the right helps you identify the button). The path to the postgres binary
+    should be added in the box titled C/C++ application; for example,
+    "/home/sudarsha/git/postgresql14/install/bin/postgres"
+
+    3. Switch to the tab "Arguments". At "Program arguments" type the arguments
+    "--single -D PGDATADIR test" where PGDATADIR is the directory where the database was
+    created, e.g "/home/sudarsha/git/postgresql/install/data" and test is the name of the
+    database you created following the instructions in
+    http://www.cse.iitb.ac.in/dbms/Data/Courses/CS631/PostgreSQL-Resources/pgsql_demo.txt
+    Then click the "Apply" button. Click "Run" to start the program. should see following in
+    your console:
+
+        PostgreSQL stand-alone backend 14.5
+        backend>
+
+You can run your commands here, and you can press Ctrl-D to exit. To start up the console again,
+choose the project, and click on the Run button (a green button with a play/rightarrow symbol)
+
+(In server mode you will see the message: LOG: database system was shut down at (current date and time) UTC
+LOG: database system is ready to accept connections
+LOG: autovacuum launcher started
+)
+
+That means, the installation was successful and the server is running.
+
+Run Configurations in VSCode:
+
+    1. Open Command Pallete from Settings or Press ctrl + shift + p in VS Code.
+
+    2. Search for "Tasks: Run Task".
+
+    3. Click on Configure a task.
+
+    4. Click on Create tasks.json file from template.
+
+    5. Click Other.
+
+    6. Edit the JSON file as follows and insert the correct path and database name as per your requirement.
+
+    {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Run PostgreSQL",
+                "type": "shell",
+                "command": "path_to_postgres/postgresql/install/bin/postgres",
+                "args": ["--single", "-D", "path_to_postgres/postgresql/install/data", "testDB"],
+                "group": {
+                    "kind": "build",
+                    "isDefault": true
+                }
+            }
+        ]
+    }
+
+    7. The task Run PostgreSQL should now be available in your command pallete (ctrl + shift + p) -> "Tasks: Run Task".
+
+        You can also use ctrl + shift + b to run the postgres task.
+
+        You should see following in your console:
+        PostgreSQL stand-alone backend 14.5
+        backend>
+
+    8. You can run your commands here, and you can press Ctrl-D to exit.

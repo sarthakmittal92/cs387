@@ -1,0 +1,21 @@
+First create two tables r(a varchar(10) primary key, b varchar(10)) and delta_r(op char(1),
+a varchar(10), b varchar(10)). Your goal is to ensure that whenever a tuple is inserted into
+table r, the same tuple is inserted into delta_r, with op having value 'I'.
+
+You only need to handle
+    insert into r values (...)
+
+Anything that does not start with insert into r values can be ignored.
+If you make any other assumptions, just state it in your code.
+
+To explore PostgreSQL, use the debugger, set a breakpoint at exec_simple_query (in postgres.c)
+and find the contents of query string. Next, if the query string is an insert into table r,
+modify it by appending the extra insert into delta_r.  Note that in postgresql, a query string
+can have multiple commands separated by semicolons.
+
+Submit only the relevant part of the file postgres.c, do not submit any other file. Name your
+file as rollno1_rollno2.c where rollno1 and rollno2 are your roll numbers.
+
+If you have added any header files or defined new functions to do your work, you can put them
+at the top of your submission file, and then have the inserted code prefixed by comments 
+/* CS 387 begin */ and suffixed with /* CS 387 end */.
