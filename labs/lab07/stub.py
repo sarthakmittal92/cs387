@@ -12,6 +12,7 @@ spark = (
 	.master("local[*]")
 	.getOrCreate()
 )
+spark.sparkContext.setCheckpointDir('checkpoint')
 spark.sparkContext.setLogLevel("ERROR")
 KAFKA_TOPIC_NAME = "input"
 KAFKA_BOOTSTRAP_SERVER = "localhost:9092"
@@ -20,7 +21,7 @@ class thread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 	def run(self):
-		time.sleep(25)
+		# time.sleep(25)
 		print("Producing messages")
 		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
 		with open('data.csv', 'r') as file:
@@ -29,6 +30,7 @@ class thread(threading.Thread):
 				message = ','.join(row).encode('utf-8')
 				producer.send('input', message)
 		producer.close()
+		print("Production done")
 
 if __name__ == "__main__":
 
@@ -41,36 +43,22 @@ if __name__ == "__main__":
     )
 	t = thread()
 	query = sampleDataframe.selectExpr("CAST(value AS STRING)")
-	query = query.select(split('value', ',').alias('value'))
-	output = query.select(*[query['value'][i] for i in range(4)])
-	output = output.withColumnRenamed("value[0]", "value0")\
+	query1 = query.select(split('value', ',').alias('value'))
+	output = query1.select(*[query1['value'][i] for i in range(4)])
+	output1 = output.withColumnRenamed("value[0]", "value0")\
 	.withColumnRenamed("value[1]", "value1")\
 	.withColumnRenamed("value[2]", "value2")\
 	.withColumnRenamed("value[3]", "value3")
-	output = output.withColumn('timestamp', unix_timestamp(col('value3'), "d MMMM yyyy").cast(TimestampType()))
-	output = output.selectExpr("value1 as movieId", "value0 as user", "cast(value2 as int) as rating", 'value3', 'timestamp', 'day(timestamp) as day', 'month(timestamp) as month', 'year(timestamp) as year')
+	output2 = output1.withColumn('timestamp', unix_timestamp(col('value3'), "d MMMM yyyy").cast(TimestampType()))
+	output3 = output2.selectExpr("value1 as movieId", "value0 as user", "cast(value2 as int) as rating", 'value3', 'timestamp', 'day(timestamp) as day', 'month(timestamp) as month', 'year(timestamp) as year')
 
 	# Query 1
 	if(sys.argv[1] == "q1"):
 		# Write query here
-		query = sampleDataframe.selectExpr("CAST(value AS STRING)")
-		query = query.select(split('value', ',').alias('value'))
-		output = query.select(*[query['value'][i] for i in range(4)])
-		output = output.withColumnRenamed("value[0]", "value0")\
-		.withColumnRenamed("value[1]", "value1")\
-		.withColumnRenamed("value[2]", "value2")\
-		.withColumnRenamed("value[3]", "value3")
-		output = output.withColumn('timestamp', unix_timestamp(col('value3'), "d MMMM yyyy").cast(TimestampType()))
-		output = output.selectExpr("value1 as movieId", "value0 as user", "cast(value2 as int) as rating", 'value3', 'timestamp', 'day(timestamp) as day', 'month(timestamp) as month', 'year(timestamp) as year')
 		t.start()
+		# https://stackoverflow.com/questions/69930586/how-to-use-writestream-from-a-pyspark-streaming-dataframe-to-chop-the-values-int
 		# Write the query output to Kafka topic 'output' with waiting time of termination being 120 seconds
-		# time.sleep(25)
-		print("Producing messages")
-		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
-		for row in output:
-			message = ','.join(row).encode('utf-8')
-			producer.send('output', message)
-		producer.close()
+		output3.withColumnRenamed("movieId","value").writeStream.format("kafka").option("checkpointLocation",'checkpoint').option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVER).option("topic", 'output').start()
 		t.join()
 
 	# Query2
