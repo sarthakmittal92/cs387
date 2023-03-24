@@ -85,7 +85,7 @@ if __name__ == "__main__":
 	# Query 3
 	if(sys.argv[1] == "q3"):
 		# Write query here
-		output3 = output
+		output3 = output.select("user", "year", "month", "rating").where("rating is not null").groupBy(["user", "year", "month"]).agg({"rating":"avg"}).withColumnRenamed("avg(rating)","avg_rating").where("avg_rating > 5.0")
 		t.start()
 		output3.selectExpr("'null' as key", "CONCAT(CAST(user AS STRING),\",\", CAST(year as STRING),\",\", CAST(month as STRING),\",\", CAST(avg_rating as STRING)) as value") \
 	    .writeStream \
