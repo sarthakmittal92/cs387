@@ -154,3 +154,23 @@
 [2023-03-24T17:04:27.316+0530][gc,metaspace] GC(7) Metaspace: 41553K(42176K)->41553K(42176K) NonClass: 36693K(37056K)->36693K(37056K) Class: 4859K(5120K)->4859K(5120K)
 [2023-03-24T17:04:27.316+0530][gc          ] GC(7) Pause Young (Normal) (G1 Evacuation Pause) 193M->148M(1024M) 13.110ms
 [2023-03-24T17:04:27.316+0530][gc,cpu      ] GC(7) User=0.08s Sys=0.00s Real=0.01s
+[2023-03-24T17:15:40.875+0530][gc,start    ] GC(8) Pause Young (Normal) (G1 Evacuation Pause)
+[2023-03-24T17:15:40.875+0530][gc,task     ] GC(8) Using 8 workers of 8 for evacuation
+[2023-03-24T17:15:40.888+0530][gc,phases   ] GC(8)   Pre Evacuate Collection Set: 0.3ms
+[2023-03-24T17:15:40.889+0530][gc,phases   ] GC(8)   Merge Heap Roots: 0.3ms
+[2023-03-24T17:15:40.889+0530][gc,phases   ] GC(8)   Evacuate Collection Set: 10.8ms
+[2023-03-24T17:15:40.889+0530][gc,phases   ] GC(8)   Post Evacuate Collection Set: 1.4ms
+[2023-03-24T17:15:40.889+0530][gc,phases   ] GC(8)   Other: 0.3ms
+[2023-03-24T17:15:40.889+0530][gc,heap     ] GC(8) Eden regions: 46->0(48)
+[2023-03-24T17:15:40.889+0530][gc,heap     ] GC(8) Survivor regions: 5->3(7)
+[2023-03-24T17:15:40.889+0530][gc,heap     ] GC(8) Old regions: 14->16
+[2023-03-24T17:15:40.889+0530][gc,heap     ] GC(8) Archive regions: 2->2
+[2023-03-24T17:15:40.889+0530][gc,heap     ] GC(8) Humongous regions: 129->129
+[2023-03-24T17:15:40.889+0530][gc,metaspace] GC(8) Metaspace: 42423K(43008K)->42423K(43008K) NonClass: 37400K(37696K)->37400K(37696K) Class: 5023K(5312K)->5023K(5312K)
+[2023-03-24T17:15:40.889+0530][gc          ] GC(8) Pause Young (Normal) (G1 Evacuation Pause) 194M->148M(1024M) 13.403ms
+[2023-03-24T17:15:40.889+0530][gc,cpu      ] GC(8) User=0.09s Sys=0.01s Real=0.01s
+[2023-03-24T17:15:41.087+0530][gc,heap,exit] Heap
+[2023-03-24T17:15:41.087+0530][gc,heap,exit]  garbage-first heap   total 1048576K, used 155978K [0x00000000c0000000, 0x0000000100000000)
+[2023-03-24T17:15:41.087+0530][gc,heap,exit]   region size 1024K, 7 young (7168K), 3 survivors (3072K)
+[2023-03-24T17:15:41.087+0530][gc,heap,exit]  Metaspace       used 42552K, committed 43136K, reserved 1089536K
+[2023-03-24T17:15:41.087+0530][gc,heap,exit]   class space    used 5057K, committed 5312K, reserved 1048576K
