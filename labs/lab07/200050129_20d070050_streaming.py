@@ -23,7 +23,7 @@ class thread(threading.Thread):
 		# time.sleep(25)
 		print("Producing messages")
 		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
-		with open('data1.csv', 'r') as file:
+		with open('data2.csv', 'r') as file:
 			reader = csv.reader(file)
 			for row in reader:
 				message = ','.join(row).encode('utf-8')
@@ -69,7 +69,7 @@ if __name__ == "__main__":
 	# Query2
 	if(sys.argv[1] == "q2"):
 		# Write query here
-		output2 = output# output1.writeStream.format("console").start()
+		output2 = output.select("user", "year", "month", "rating").where("rating is not null").groupBy(["user", "year", "month"]).agg({"rating":"count"}).withColumnRenamed("count(rating)","c_rating").where("c_rating > 10")
 		t.start()
 		output2.selectExpr("'null' as key", "CONCAT(CAST(user AS STRING),\",\", CAST(year as STRING),\",\", CAST(month as STRING)) as value") \
 	    .writeStream \
