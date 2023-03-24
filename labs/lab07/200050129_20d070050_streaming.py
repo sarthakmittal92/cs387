@@ -23,7 +23,7 @@ class thread(threading.Thread):
 		# time.sleep(25)
 		print("Producing messages")
 		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
-		with open('data2.csv', 'r') as file:
+		with open('data1.csv', 'r') as file:
 			reader = csv.reader(file)
 			for row in reader:
 				message = ','.join(row).encode('utf-8')
