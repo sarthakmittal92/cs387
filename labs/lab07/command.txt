@@ -7,4 +7,4 @@ bin/kafka-topics.sh --delete --topic output --bootstrap-server localhost:9092
 bin/kafka-console-consumer.sh --topic input --from-beginning --bootstrap-server localhost:9092
 bin/kafka-console-consumer.sh --topic output --from-beginning --bootstrap-server localhost:9092
 
-spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.2 stub.py q1
+spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.2 200050129_20d070050_streaming.py q1
