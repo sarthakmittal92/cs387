@@ -1,0 +1,131 @@
+---------------------------------- Case 01 --------------------------------
+Query: select * from takes where id = '1';
+Plan:  Bitmap Heap Scan on takes  (cost=4.40..52.84 rows=15 width=24) (actual time=0.038..0.039 rows=0 loops=1)
+   Recheck Cond: ((id)::text = '1'::text)
+   ->  Bitmap Index Scan on takes_pkey  (cost=0.00..4.40 rows=15 width=0) (actual time=0.034..0.034 rows=0 loops=1)
+         Index Cond: ((id)::text = '1'::text)
+Reasoning: there is an index on 'id' attribute so bitmap will be scanned
+Explanation: bitmap scan on index in order to reduce the number of scans in the heap
+
+---------------------------------- Case 02 --------------------------------
+Query: select name from instructor where id = '1' and salary between 10 and 50000;
+Plan:  Index Scan using instructor_pkey on instructor  (cost=0.15..8.17 rows=1 width=58) (actual time=0.019..0.020 rows=0 loops=1)
+   Index Cond: ((id)::text = '1'::text)
+   Filter: ((salary >= '10'::numeric) AND (salary <= '50000'::numeric))
+Reasoning: there is an index on 'id' but not on salary
+Explanation: index scan on index and then filter on the salary
+
+---------------------------------- Case 03 --------------------------------
+Query: select id from student where id < '300' or 1 = 0;
+Plan:  Index Only Scan using student_pkey on student  (cost=0.28..20.31 rows=459 width=5) (actual time=0.085..0.247 rows=444 loops=1)
+   Index Cond: (id < '300'::text)
+   Heap Fetches: 0
+Reasoning: index scan occurs on student because the other predicate is false
+Explanation: index scan on student 'id' (no heap fetches)
+
+---------------------------------- Case 04 --------------------------------
+Query: select * from takes join student on takes.id = student.id where student.id = '1';
+Plan:  Nested Loop  (cost=4.68..61.29 rows=15 width=48) (actual time=0.037..0.039 rows=0 loops=1)
+   ->  Index Scan using student_pkey on student  (cost=0.28..8.29 rows=1 width=24) (actual time=0.036..0.036 rows=0 loops=1)
+         Index Cond: ((id)::text = '1'::text)
+   ->  Bitmap Heap Scan on takes  (cost=4.40..52.84 rows=15 width=24) (never executed)
+         Recheck Cond: ((id)::text = '1'::text)
+         ->  Bitmap Index Scan on takes_pkey  (cost=0.00..4.40 rows=15 width=0) (never executed)
+               Index Cond: ((id)::text = '1'::text)
+Reasoning: there is an index on 'id' and the condition enforces use of index scan
+Explanation: bitmap index scan helps in reducing the heap scan for join
+
+---------------------------------- Case 05 --------------------------------
+Query: create index i1 on takes(id, semester, year);
+Time: 187.750 ms
+Query: drop index i1;
+Time: 7.915 ms
+
+---------------------------------- Case 06 --------------------------------
+Query: create table takes2
+    (ID            varchar(5),
+     course_id        varchar(8),
+     sec_id            varchar(8),
+     semester        varchar(6),
+     year            numeric(4,0),
+     grade                varchar(2));
+Time: 9.014 ms
+Query: insert into takes2 select * from takes;
+Time: 79.761 ms
+Plan:  Insert on takes2  (cost=0.00..520.00 rows=30000 width=24) (actual time=85.256..85.258 rows=0 loops=1)
+   ->  Seq Scan on takes  (cost=0.00..520.00 rows=30000 width=24) (actual time=0.026..11.786 rows=30000 loops=1)
+
+---------------------------------- Case 07 --------------------------------
+Query: alter table takes2 add primary key (id, course_id, sec_id, semester, year);
+Time: 231.531 ms
+
+---------------------------------- Case 08 --------------------------------
+Query: create table takes2
+    (ID            varchar(5),
+     course_id        varchar(8),
+     sec_id            varchar(8),
+     semester        varchar(6),
+     year            numeric(4,0),
+     grade                varchar(2),
+     primary key (ID, course_id, sec_id, semester, year));
+Time: 11.331 ms
+Query: insert into takes2 select * from takes;
+Time: 402.280 ms
+Plan:  Insert on takes2  (cost=0.00..520.00 rows=30000 width=24) (actual time=429.485..429.487 rows=0 loops=1)
+   ->  Seq Scan on takes  (cost=0.00..520.00 rows=30000 width=24) (actual time=0.014..10.496 rows=30000 loops=1)
+Reasoning: because of existence of a primary key, the insert needs to find the insert position
+by scanning the index and then adds to the table, while the earlier case was direct insert
+Explanation: the time taken to first insert an then adding constraint takes lesser (311.292ms)
+time than insert with primary key (402.28ms), so it might be better to add constraints later
+but only if the data that is being inserted can be trusted to follow the constraints
+
+---------------------------------- Case 09 --------------------------------
+Query: select id from takes natural join student order by id;
+Plan: Merge Join (cost=0.56..1628.57 rows=30000 width=5)
+        Merge Cond: ((takes.id)::text = (student.id)::text)
+            -> Index Only Scan using takes_pkey on takes (cost=0.29..1178.29 rows=30000 width=5)
+            -> Index Only Scan using student_pkey on student (cost=0.28..70.28 rows=2000 width=5)
+Reasoning: because there is an order by clause on the same field which is the common join attribute
+Explanation: merge conditions are used whenever it is preferable to sort individual relations
+before joining, as is the case here
+
+---------------------------------- Case 10 --------------------------------
+Query: select id from instructor natural join department order by dept_name;
+Plan:  Sort  (cost=4.51..4.64 rows=50 width=15)
+   Sort Key: instructor.dept_name
+   ->  Hash Join  (cost=1.45..3.10 rows=50 width=15)
+         Hash Cond: ((instructor.dept_name)::text = (department.dept_name)::text)
+         ->  Seq Scan on instructor  (cost=0.00..1.50 rows=50 width=15)
+         ->  Hash  (cost=1.20..1.20 rows=20 width=9)
+               ->  Seq Scan on department  (cost=0.00..1.20 rows=20 width=9)
+Query: select id from instructor natural join department order by dept_name limit 10;
+Plan: Limit (cost=3.06..14.70 rows=10 width=15)
+        -> Merge Join (cost=3.06..61.26 rows=50 width=15)
+            Merge Cond: ((department.dept_name)::text = (instructor.dept_name)::text)
+            -> Index Only Scan using department_pkey on department (cost=0.15..56.25 rows=540 width=58)
+            -> Sort (cost=2.91..3.04 rows=50 width=15)
+                Sort Key: instructor.dept_name
+                -> Seq Scan on instructor (cost=0.00..1.50 rows=50 width=15)
+Reasoning: the original query was too large to sort initially but the limit clause allowed
+us to instead use merge sort
+
+---------------------------------- Case 11 --------------------------------
+Query: select dept_name, avg(salary) from instructor group by dept_name;
+Plan:  HashAggregate  (cost=1.75..1.96 rows=17 width=42)
+   Group Key: dept_name
+   ->  Seq Scan on instructor  (cost=0.00..1.50 rows=50 width=19)
+Reasoning: hash sorting is faster because of multiple entries
+
+---------------------------------- Case 12 --------------------------------
+Query: select dept_name, avg(salary) from instructor where id = '301' group by dept_name;
+Plan:  GroupAggregate  (cost=1.64..1.66 rows=1 width=42) (actual time=0.103..0.104 rows=0 loops=1)
+   Group Key: dept_name
+   ->  Sort  (cost=1.64..1.64 rows=1 width=19) (actual time=0.100..0.101 rows=0 loops=1)
+         Sort Key: dept_name
+         Sort Method: quicksort  Memory: 25kB
+         ->  Seq Scan on instructor  (cost=0.00..1.62 rows=1 width=19) (actual time=0.034..0.035 rows=0 loops=1)
+               Filter: ((id)::text = '301'::text)
+               Rows Removed by Filter: 50
+Reasoning: it has a single row so sorting takes lesser time than hashing
+Explanation: group aggregation uses sorting (quicksort) on dept_name with filter on 'id'
+--------------------------------------------------------------------------
