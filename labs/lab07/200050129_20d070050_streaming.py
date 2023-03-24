@@ -20,16 +20,15 @@ class thread(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 	def run(self):
-		# time.sleep(25)
+		time.sleep(25)
 		print("Producing messages")
 		producer = KafkaProducer(bootstrap_servers=[KAFKA_BOOTSTRAP_SERVER])
-		with open('data2.csv', 'r') as file:
+		with open('data.csv', 'r') as file:
 			reader = csv.reader(file)
 			for row in reader:
 				message = ','.join(row).encode('utf-8')
 				producer.send('input', message)
 		producer.close()
-		print('Done..')
 
 if __name__ == "__main__":
 
@@ -81,7 +80,6 @@ if __name__ == "__main__":
 	    .start().awaitTermination(120)
 		t.join()
 
-
 	# Query 3
 	if(sys.argv[1] == "q3"):
 		# Write query here
@@ -100,7 +98,7 @@ if __name__ == "__main__":
 	# Query 4
 	if(sys.argv[1] == "q4"):
 		# Write query here
-		output4 = output
+		output4 = output.select("movieId", "year", "month", "day", "rating").where("rating is not null").groupBy(["movieId", "year", "month", "day"]).agg({"rating":"count"}).withColumnRenamed("count(rating)","c_rating").where("c_rating > 100")
 		t.start()
 		output4.selectExpr("'null' as key", "CONCAT(CAST(movieId AS STRING),\",\", CAST(day as STRING),\",\", CAST(month as STRING),\",\", CAST(year as STRING)) as value") \
 	    .writeStream \
