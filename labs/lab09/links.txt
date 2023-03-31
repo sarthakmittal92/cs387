@@ -1,0 +1,2 @@
+Transactions: https://db-book.com/slides-dir/PDF-dir/ch17.pdf
+Concurrency Control: https://db-book.com/slides-dir/PDF-dir/ch18.pdf

@@ -1,0 +1,16 @@
+Load the university schema into your database (see earlier part of the assignment) if you
+haven't loaded it already. If you have loaded the schema + data, you need to drop tables
+first.
+
+1. Do not use pgadmin3/pgadmin4 for loading data as it may hang.
+2. open terminal and start psql with appropriate port number and database name (refer 1st lab
+on PostgreSQL setup)
+3. From within psql, run the command  \i <filename>
+    e.g.just type the following to load the schema:
+        \i DDL.sql      
+    and after schema is loaded, type:
+        \i largeRelationsInsertFile.sql
+    Run the command from the same directory where you saved the file.
+4. You will see "INSERT 0 1" being printed for every insert. It will take some time but will
+terminate successfully. You may see an unchanging screen even though the system is
+continuously printing the above line. Hit enter to see if prints are ongoing.
