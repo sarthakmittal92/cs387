@@ -1,0 +1,122 @@
+Transactions and Concurrency
+
+NOTE:
+1. Assignment to be submitted individually.
+2. The examples below are to be run on the small university database, not on the large
+university database. Run the small university database loading script in case you used the
+large database for the previous exercise.
+
+Transactions
+
+In this exercise, you will see how to rollback or commit transactions. By default PostgreSQL
+commits each SQL statement as soon as it is submitted. To prevent the transaction from
+committing immediately, you have to issue a command begin; to tell PostgreSQL to not commit
+immediately. You can issue any number of SQL statements after this, and then either commit;
+to commit the transaction, or rollback; to rollback the transaction. To see the effect,
+execute the following commands one at a time
+    begin ;
+    select * from student where name = 'Tanaka';
+    delete from student where name = 'Tanaka';
+    select * from student where name = 'Tanaka';
+    rollback;
+    select * from student where name = 'Tanaka';
+In your submission, explain what you observed and why it happened.
+
+Concurrency
+
+PostgreSQL implements concurrency control using read committed isolation level as the default,
+but also supports a concurrent control mechanism called serializable snapshot isolation which
+can be turned on by executing the command.
+
+Type below command for current isolation level:
+    show transaction isolation level;
+
+Note: please do not set transaction isolation level as serializable  right now,  you will do it
+in later exercises.
+    set transaction isolation level serializable;
+
+In the read committed isolation level, each statement sees the effects of all preceding
+transactions that have committed, but does not see the effect of concurrently running
+transactions (i.e. updates that have not been committed yet). This low level of consistency
+can cause problems with transactions, and it is safer to use the serializable level if
+concurrent updates occur with multiple statement transactions.
+
+In snapshot isolation, where a transaction gets a conceptual snapshot of data at the time it
+started, and all values it reads are as per this snapshot. In snapshot isolation, if two
+transactions concurrently update the same data item, one of them will be rolled back. Snapshot
+isolation does NOT guarantee serializability of transactions. For example, it is possible that
+transaction T1 reads A and performs an update B=A, while transaction T2 reads B and performs
+an update A=B. In this case, there is no conflict on the update, since different tuples are
+updated by the two transactions, but the execution may not be serializable: in any serial
+schedule, A and B will become the same value, but with snapshot isolation, they may exchange
+values.
+
+Oracle uses snapshot isolation for concurrency control when asked to set the isolation level
+to serializable, even though it does not really guarantee serializability. Microsoft SQL Server
+supports snapshot isolation, but uses two-phase locking for the serializable isolation level.
+PostgreSQL versions prior to 9.1 used snapshot isolation when the isolation level was set to
+serializable. 
+
+However, since version 9.1, PostgreSQL uses an improved version of snapshot isolation, called
+serializable snapshot isolation, when asked to set the isolation level to serializable. This
+mechanism in fact offers true serializability, unlike plain snapshot isolation.
+
+1. In this exercise you will run transactions concurrently from two different pgAdmin3 windows, to
+see how updates by one transaction affect another.
+    - Open two pgAdmin3 connections to the same database. Execute the following commands in
+    sequence in the first window
+        begin ;
+        update student set tot_cred = 55 where name = 'Tanaka';
+    - Now in the second window execute
+        begin;
+        select * from student where name = 'Tanaka';
+    - Look at the value of tot_cred. Can you figure out why you got the result that you saw?
+    What does this tell you about concurrency control in PostgreSQL?
+    - Now in the first window execute
+        commit;
+    - And in the second window execute
+        commit;
+    - Observe how although the second transaction committed successfully after the first, it
+    got the old value for tot_cred.
+
+2. Now, let us try to update the same tuple concurrently from two windows.
+    - In one window execute
+        begin;
+        update student set tot_cred = 44 where name = 'Tanaka'
+    - Then in the second window, execute one after another:
+        begin;
+        select min(tot_cred) from student where name = 'Tanaka';
+        update student set tot_cred = (select min(tot_cred) from
+            student where name = 'Tanaka') + 20 where name = 'Tanaka';
+    - See what happens at this point. The query appears to be hanging: PostgreSQL is waiting
+    for the other query that updates student to complete.
+    - Now in the first window, execute 
+        commit; 
+    and see what happens in the second window.
+    - Then execute commit; in the second window and see what happens.
+    - Now in the second window execute 
+        select min(tot_cred) from student where name = 'Tanaka';
+    - This is the value after the above update was committed. Explain why you got the above
+    value rather than 64.
+
+3. Next, in both windows execute the command after the begin command
+    set transaction isolation level serializable;
+and reexecute the above queries, and see what happens. Describe what you observed, and explain
+why it happened.
+
+4. Open two connections (two new query windows) and type the following:
+    - Run the query:
+        select id, salary from instructor where id in('22222', '15151');
+    and note the results
+    - Begin a transaction
+    - Set isolation level to serializable
+    - Run this query in window 1:
+        update instructor set salary = (select salary from
+        instructor where id = '22222') where id = '15151';
+    - Run this query in window 2:
+        update instructor set salary = (select salary from 
+        instructor where id = '15151') where id = '22222';
+    - commit window 1
+    - commit window 2
+    - What happened above? Check the state of the system by running the query 
+        select id, salary from instructor where id in('22222', '15151');
