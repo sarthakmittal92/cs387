@@ -1,3 +1,7 @@
+You can find all the files here:
+https://github.com/postgres/postgres/tree/REL_14_STABLE/src/backend
+Use the "Go to file" feature to search for the file by name
+
 Go to backend>main and open main.c. Scroll down and you will find a call to PostgresMain,
 which is the actual main function for the backend
 
